@@ -1199,7 +1199,10 @@
                 </div>
                 
                 <!-- Note: The 'action' attribute is removed. Form submission is handled by JS. -->
-                <form class="contact-form">
+                <!-- UPDATED for Netlify Forms -->
+                <form class="contact-form" method="POST" data-netlify="true" name="contact">
+                    <!-- NEW: Hidden input for Netlify -->
+                    <input type="hidden" name="form-name" value="contact">
                     <p>Or send me a message directly:</p>
                     <div class="form-group">
                         <label for="name">Name</label>
@@ -1396,26 +1399,31 @@
             // --- Updated Form Submission ---
             const contactForm = document.querySelector('.contact-form');
             if (contactForm) {
-                contactForm.addEventListener('submit', (e) => {
+                contactForm.addEventListener('submit', async (e) => { // Added async
                     e.preventDefault(); // Prevent default form submission
 
-                    // In a real application, you'd send this data to a server
-                    // using fetch() or a service like Formspree or Netlify Forms.
-                    console.log('Form submitted!');
                     const formData = new FormData(contactForm);
-                    const data = Object.fromEntries(formData.entries());
-                    console.log(data);
 
-                    // Show the success toast instead of alert()
-                    showToast('Thank you for your message!');
-                    
-                    contactForm.reset(); // Clear the form
+                    try {
+                        // NEW: AJAX submission for Netlify
+                        await fetch("/", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: new URLSearchParams(formData).toString()
+                        });
+
+                        // Show the success toast instead of alert()
+                        showToast('Thank you for your message!');
+                        contactForm.reset(); // Clear the form
+
+                    } catch (error) {
+                        console.error("Form submission error:", error);
+                        showToast('Oops! Something went wrong.'); // Error message
+                    }
                 });
             }
         });
     </script>
 </body>
 </html>
-
-
 
